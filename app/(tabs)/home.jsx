@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, Image, RefreshControl, Text, View } from "react-native";
+import { FlatList, Image, RefreshControl, Text, View, TouchableOpacity } from "react-native";
 
 import { images } from "../../constants";
 import useAppwrite from "../../lib/useAppwrite";
 import { getAllPosts, getLatestPosts } from "../../lib/appwrite";
 import { EmptyState, SearchInput, Trending, VideoCard } from "../../components";
+import Carousel from "./CustomCarousel";
 
 const Home = () => {
   const { data: posts, refetch } = useAppwrite(getAllPosts);
@@ -47,8 +48,11 @@ const Home = () => {
                   Welcome Back
                 </Text>
                 <Text className="text-2xl font-psemibold text-white">
-                  JSMastery
+                  Moronss
                 </Text>
+                {/* <Text className="font-pmedium text-sm text-gray-100">
+                  Let's Solve Todays Challenge!
+                </Text> */}
               </View>
 
               <View className="mt-1.5">
@@ -61,10 +65,17 @@ const Home = () => {
             </View>
 
             <SearchInput />
+            <Carousel/>
+
+            <View className='flex-1 justify-center items-center'>
+      <TouchableOpacity className='w-52 h-14 bg-orange-400 border border-white rounded-lg justify-center items-center'>
+        <Text className='font-medium'>Your Credibility Status</Text>
+      </TouchableOpacity>
+            </View>
 
             <View className="w-full flex-1 pt-5 pb-8">
               <Text className="text-lg font-pregular text-gray-100 mb-3">
-                Latest Videos
+                Let's Explore
               </Text>
 
               <Trending posts={latestPosts ?? []} />
