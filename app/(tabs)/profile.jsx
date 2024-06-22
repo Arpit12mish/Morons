@@ -4,16 +4,18 @@ import { View, Image, FlatList, TouchableOpacity } from "react-native";
 
 import { icons } from "../../constants";
 import useAppwrite from "../../lib/useAppwrite";
-import { getUserPosts, signOut } from "../../lib/appwrite";
+// import { getUserPosts, signOut } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
+import { signOut, getAuth } from "firebase/auth";
 import { EmptyState, InfoBox, VideoCard } from "../../components";
-
+import { app } from "../../lib/firebase";
+const auth = getAuth(app);
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
   const { data: posts } = useAppwrite(() => getUserPosts(user.$id));
 
   const logout = async () => {
-    await signOut();
+    await signOut(auth);
     setUser(null);
     setIsLogged(false);
 
