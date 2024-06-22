@@ -4,10 +4,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 
 import { images } from "../../constants";
-import { createUser } from "../../lib/appwrite";
+// import { createUser } from "../../lib/appwrite";
 import { CustomButton, FormField } from "../../components";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  getAuth,
+} from "firebase/auth";
 import { useGlobalContext } from "../../context/GlobalProvider";
-
+import { app } from "../../lib/firebase";
+const auth = getAuth(app);
 const SignUp = () => {
   const { setUser, setIsLogged } = useGlobalContext();
 
@@ -21,15 +27,24 @@ const SignUp = () => {
   const submit = async () => {
     if (form.username === "" || form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in all fields");
+      return;
     }
 
     setSubmitting(true);
     try {
-      const result = await createUser(form.email, form.password, form.username);
-      setUser(result);
-      setIsLogged(true);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
+      await updateProfile(userCredential.user, {
+        displayName: form.username,
+      });
+      const user = userCredential.user;
 
-      router.replace("/home");
+      setUser(user);
+      setIsLogged(true);
+      navigation.replace("/home");
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {

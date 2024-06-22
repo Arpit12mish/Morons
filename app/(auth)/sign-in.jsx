@@ -1,12 +1,20 @@
-import { useState } from "react";
-import { Link, router } from "expo-router";
+import React, { useState } from "react";
+import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 
 import { images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
-import { getCurrentUser, signIn } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  TwitterAuthProvider,
+  getAuth,
+} from "firebase/auth";
+import { app } from "../../lib/firebase";
+const auth = getAuth(app);
 
 const SignIn = () => {
   const { setUser, setIsLogged } = useGlobalContext();
@@ -19,14 +27,19 @@ const SignIn = () => {
   const submit = async () => {
     if (form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in all fields");
+      return;
     }
 
     setSubmitting(true);
 
     try {
-      await signIn(form.email, form.password);
-      const result = await getCurrentUser();
-      setUser(result);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
+      const user = userCredential.user;
+      setUser(user);
       setIsLogged(true);
 
       Alert.alert("Success", "User signed in successfully");
@@ -35,6 +48,36 @@ const SignIn = () => {
       Alert.alert("Error", error.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      setUser(user);
+      setIsLogged(true);
+
+      Alert.alert("Success", "User signed in with Google");
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const signInWithTwitter = async () => {
+    const provider = new TwitterAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      setUser(user);
+      setIsLogged(true);
+
+      Alert.alert("Success", "User signed in with Twitter");
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert("Error", error.message);
     }
   };
 
@@ -77,6 +120,18 @@ const SignIn = () => {
             handlePress={submit}
             containerStyles="mt-7"
             isLoading={isSubmitting}
+          />
+          <CustomButton
+            title="Sign In with Google"
+            handlePress={signInWithGoogle}
+            containerStyles="mt-3"
+            buttonStyle={{ marginBottom: 10 }}
+          />
+
+          <CustomButton
+            title="Sign In with Twitter"
+            containerStyles="mt-3"
+            handlePress={signInWithTwitter}
           />
 
           <View className="flex justify-center pt-5 flex-row gap-2">
